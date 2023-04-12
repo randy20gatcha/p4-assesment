@@ -8,6 +8,7 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(cors());
 
+// End-points
 app.post('/register', (req, res) => {
     res.send({
         message: `hey ${req.body.email} you are registered`
