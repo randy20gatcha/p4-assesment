@@ -9,7 +9,7 @@ npm install
 ## dependencies if needed
 npm install firebase
 
-## used forntend framework vuetify 3
+## used frontend framework vuetify 3
 
 ### Compile and Hot-Reload for Development
 
