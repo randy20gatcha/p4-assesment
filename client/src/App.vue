@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, watchEffect } from 'vue';
 import { getDatabase, ref as REF, set, onValue, push } from "firebase/database";
 import app from './firebase';
 
@@ -106,18 +106,24 @@ export default {
     onMounted(() => {
       const db = getDatabase();
       const messagesRef = REF(db);
-      let messages = [];
-      onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
-        Object.keys(data).forEach(key => {
-          messages.push({
-            id: key,
-            username: data[key].message.username,
-            content: data[key].message.content
+      
+      try {
+          onValue(messagesRef, (snapshot) => {
+          const data = snapshot.val();
+          let messages = [];
+          Object.keys(data).forEach(key => {
+            messages.push({
+              id: key,
+              username: data[key].message.username,
+              content: data[key].message.content
+            });
           });
+          state.messages = messages;
         });
-        state.messages = messages;
-      });
+      }
+      catch(err) {
+        console.log("message is:", err.message)
+      }
       
     });
 
