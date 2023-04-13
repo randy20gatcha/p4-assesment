@@ -6,6 +6,11 @@ Building a chat app for my assesment
 ```sh
 npm install
 
+## dependencies if needed
+npm install firebase
+
+## used frontend framework vuetify 3
+
 ### Compile and Hot-Reload for Development
 
 ```sh
