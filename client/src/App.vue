@@ -1,6 +1,5 @@
 <template>
- <!-- v-if="state.username === '' || state.username === null" -->
-  <div  align="center">
+  <div  align="center" v-if="state.username === '' || state.username === null">
     <v-card max-width="500" max-height="300">
                         
       <v-card-item class="mt-8">
@@ -22,25 +21,22 @@
     </v-card>
   </div>
 
-  <div >
+  <div v-else>
     <header>
-      <button class="logout" @click="Logout">Logout</button>
+      <button class="logout" @click="logout">Logout</button>
       <h1>Welcome, {{ state.username }}</h1>
     </header>
 
-    <section>
-      <v-card  max-width="600" max-height="400">
-       <v-card-item>
-        <div 
-       >
-        <ul  v-for="message in state.messages"
-        :key="message">
-          <li>{{ message }}</li>
-        </ul>
-
+    <section class="chat-box">
+      <div 
+        v-for="message in state.messages" 
+        :key="message.key" 
+        :class="(message.username == state.username ? 'message current-user' : 'message')">
+        <div class="message-inner">
+          <div class="username">{{ message.username }}</div>
+          <div class="content">{{ message.content }}</div>
+        </div>
       </div>
-       </v-card-item>
-      </v-card>
     </section>
 
     <footer class="mt-5">
@@ -87,9 +83,13 @@ export default {
       }
     }
 
+    const logout = () => {
+      state.username = "";
+    }
+
     const sendMessage = () => {
       const db = getDatabase();
-      const messagesRef = REF(db, 'messages');
+      const messagesRef = REF(db);
       const newMessagesRef = push(messagesRef);
       if(inputMessage.value === "" || inputMessage.value === null) {
         return;
@@ -99,34 +99,31 @@ export default {
         username: state.username,
         content: inputMessage.value
       }
-      set(
-        newMessagesRef, {
-          msgs: message
-        }
-      );
+      set(newMessagesRef, { message } );
       inputMessage.value = "";
     }
 
     onMounted(() => {
       const db = getDatabase();
-      const messagesRef = REF(db, 'messages/');
-      
+      const messagesRef = REF(db);
+      let messages = [];
       onValue(messagesRef, (snapshot) => {
         const data = snapshot.val();
-        // Object.keys(data).forEach(key => {
-        //   messages.push({
-        //     id: key,
-        //     username: data[key].username,
-        //     content: data[key].content
-        //   });
-        // });
-        state.messages = data;
+        Object.keys(data).forEach(key => {
+          messages.push({
+            id: key,
+            username: data[key].message.username,
+            content: data[key].message.content
+          });
+        });
+        state.messages = messages;
       });
-      console.log(state.messages)
+      
     });
 
     return {
       login,
+      logout,
       inputMessage,
       inputUsername,
       state,
@@ -136,6 +133,49 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+.chat-box {
+			border-radius: 24px 24px 0px 0px;
+			background-color: #FFF;
+			box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2);
+			flex: 1 1 100%;
+			padding: 30px;
+			.message {
+				display: flex;
+				margin-bottom: 15px;
+				
+				.message-inner {
+					.username {
+						color: #888;
+						font-size: 16px;
+						margin-bottom: 5px;
+						padding-left: 15px;
+						padding-right: 15px;
+					}
+					.content {
+						display: inline-block;
+						padding: 10px 20px;
+						background-color: #F3F3F3;
+						border-radius: 999px;
+						color: #333;
+						font-size: 18px;
+						line-height: 1.2em;
+						text-align: left;
+					}
+				}
+				&.current-user {
+					margin-top: 30px;
+					justify-content: flex-end;
+					text-align: right;
+					.message-inner {
+						max-width: 75%;
+						.content {
+							color: #FFF;
+							font-weight: 600;
+							background-color: #ea526f;
+						}
+					}
+				}
+			}
+		}
 </style>
